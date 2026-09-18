@@ -12,7 +12,7 @@ When Aaron says **new app** in **Cursor or Grok Bot**, that platform takes the e
 - Shipped Apps (per-app intelligence): https://app.notion.com/p/73f70cad0229400c8bf627978c3de997
 - Homepage copy: **TEST REPO**
 - One dropdown value: **Tested and Approved**
-- Neon table: `approvals` (`id`, `phrase`, `source`, `created_at`)
+- Neon table: `approvals` (`id`, `phrase`, `source`, `created_at`) — schema-as-code in `src/db/migrations/001_approvals.sql`
 - Source: `web` vs `grok-bot` via `/?source=grok-bot`
 
 Homepage badges probe GitHub API, Vercel env, and Neon `COUNT(*)`. Local `.data/approvals.json` is preview-only and is **not** Neon.
@@ -41,6 +41,21 @@ node scripts/zero-touch-attach.mjs \
 ```
 
 Never commit `NEON_API_KEY`, `VERCEL_TOKEN`, or `DATABASE_URL`. Never paste them into Notion.
+
+## Ongoing loop (after day one)
+
+Hard rule: **the backend must grow with the app autonomously.** Day one (the 5-step chain above) ends when GitHub, Vercel, Notion intelligence, and Neon storage (`DATABASE_URL`) exist. After that, every feature request in Cursor or Grok Bot grows the backend without Aaron.
+
+When Aaron asks for a feature in **either** tool, the agent must, without him:
+
+1. Change app code (UI + server).
+2. Evolve Neon: add `src/db/migrations/00N_<name>.sql`, register it in `src/db/migrations.ts`, apply it against `DATABASE_URL` via Neon MCP/API (or `applyMigrations()`). Not SQL in the Neon console. Not the Vercel Storage tab.
+3. Evolve API / server actions / route handlers to match.
+4. Keep Notion intelligence current (what shipped, schema, env) on the playbook + Shipped Apps.
+5. Commit, push to GitHub, let Vercel redeploy. Neon data/schema stays in sync with production.
+6. Never require Aaron to push, migrate, or click Storage.
+
+Proof today: `001_approvals` + **Tested and Approved** write. Future features add tables the same way. Same behavior if the request starts in Grok Bot or Cursor — both must be able to migrate Neon and ship.
 
 ## One-time enables (ONCE, not per app)
 
@@ -93,4 +108,4 @@ Opens at http://127.0.0.1:43217. Submits work immediately in this preview (`.dat
 
 ## App stack
 
-Next.js 16 App Router, TypeScript, Tailwind, shadcn/ui, `@neondatabase/serverless`, native `<select>`.
+Next.js 16 App Router, TypeScript, Tailwind, shadcn/ui, `@neondatabase/serverless`, native `<select>`. Schema-as-code: `src/db/migrations/*.sql` + `src/db/migrate.ts`. Zero-touch first-ship attach: `scripts/zero-touch-attach.mjs`.

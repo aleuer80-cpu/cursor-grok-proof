@@ -17,7 +17,7 @@ export default async function Home({
 }: {
   searchParams: Promise<{ source?: string }>
 }) {
-  const stack = getStackStatus()
+  const stack = await getStackStatus()
   const neonReady = isNeonConfigured()
   const { source: sourceParam } = await searchParams
   const source = resolveWriteSource(sourceParam)
@@ -40,12 +40,21 @@ export default async function Home({
           TEST REPO
         </h1>
       </div>
-      <ul className="flex flex-wrap items-center justify-center gap-2">
+      <ul className="flex flex-wrap items-start justify-center gap-4">
         {stack.map((service) => (
-          <li key={service.name}>
-            <Badge variant={service.connected ? "default" : "outline"}>
-              {service.name}: {service.connected ? "connected" : "pending"}
-            </Badge>
+          <li key={service.name} className="flex max-w-56 flex-col items-center gap-1 text-center">
+            {service.href ? (
+              <a href={service.href} target="_blank" rel="noreferrer">
+                <Badge variant={service.connected ? "default" : "outline"}>
+                  {service.name}: {service.connected ? "hit" : "miss"}
+                </Badge>
+              </a>
+            ) : (
+              <Badge variant={service.connected ? "default" : "outline"}>
+                {service.name}: {service.connected ? "hit" : "miss"}
+              </Badge>
+            )}
+            <p className="text-xs text-muted-foreground">{service.detail}</p>
           </li>
         ))}
       </ul>

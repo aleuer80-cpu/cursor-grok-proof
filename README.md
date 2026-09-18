@@ -7,6 +7,18 @@ Proof site for the GitHub → Vercel → Neon path shared by Cursor and Grok Bot
 - One dropdown value: **Tested and Approved**
 - Neon table: `approvals` (`id`, `phrase`, `source`, `created_at`)
 
+The homepage badges actually probe each hop: GitHub API, Vercel env, Neon `COUNT(*)`.
+
+## Cursor Origin repo
+
+This cloud-agent token cannot mint a named Origin repo (`origin repo create` / `create-mirrored` return not scoped). To see **cursor-grok-proof** under Cursor Repositories / Codebase:
+
+1. Click **Create repo** above the agent input.
+2. Name it `cursor-grok-proof`.
+3. Create the Origin repo.
+
+That publishes this draft so it shows up at [cursor.com/codebase](https://cursor.com/codebase).
+
 ## Local
 
 ```bash
@@ -14,32 +26,27 @@ npm install
 npm run dev
 ```
 
-Opens at http://127.0.0.1:43217. The dropdown submit works immediately in this preview (rows land in `.data/approvals.json`). Copy `.env.example` to `.env.local` and set `DATABASE_URL` when you want those same writes to go to Neon.
+Opens at http://127.0.0.1:43217. Submits work immediately in this preview (`.data/approvals.json`). With `DATABASE_URL` they go to Neon instead.
 
-## Connect Vercel (once, in the dashboard)
+## Connect Vercel (dashboard)
 
-This Cloud Agent cannot git-link a Vercel project on the personal Hobby account `aleuer80-cpu`. Import the GitHub repo yourself so later pushes to `main` deploy:
+This agent cannot git-link Vercel on personal Hobby `aleuer80-cpu` (API 403). Import the GitHub repo yourself:
 
 1. Open [vercel.com/new](https://vercel.com/new).
 2. Import **aleuer80-cpu/cursor-grok-proof**.
-3. Deploy. Framework is Next.js; leave defaults.
+3. Deploy.
 
-## Connect Neon (once, on that Vercel project)
+## Connect Neon (on that Vercel project)
 
-1. In the Vercel project, open Storage / Marketplace and add **Neon**.
-2. Confirm `DATABASE_URL` is set for Production and Preview.
-3. Redeploy if the first build ran before Neon was attached.
-
-When Neon is live, the site badge reads `Neon: connected` and submits go to Postgres instead of the preview file.
+1. Storage / Marketplace → add **Neon**.
+2. Confirm `DATABASE_URL` for Production and Preview.
+3. Redeploy if needed.
+4. Re-submit **Tested and Approved** on the Vercel URL so rows land in Postgres (preview rows stay local).
 
 ## Prove Cursor and Grok Bot share the stack
 
-1. Confirm Grok Bot’s GitHub plugin is pointed at **aleuer80-cpu/cursor-grok-proof** (same repo Cursor uses).
-2. From Grok Bot, open `src/app/page.tsx` and confirm the heading is still `TEST REPO`.
-3. After Vercel + Neon are connected, open the production URL with `/?source=grok-bot`.
-4. Leave the dropdown on **Tested and Approved** and click **Write to Neon**.
-5. A row should appear: `Tested and Approved` from `grok-bot`.
-6. From Cursor (or the same URL without the query), submit again. That row is tagged `web`.
-7. Both rows in one list means both platforms wrote to the same Neon database.
-
-Vercel, Neon, and Notion plugins in Grok Bot are a separate install/auth list from Cursor MCP. GitHub is the shared source of truth once both tools can write to this repo.
+1. Point Grok Bot’s GitHub plugin at **aleuer80-cpu/cursor-grok-proof**.
+2. Confirm `src/app/page.tsx` still says TEST REPO.
+3. After Vercel + Neon, open the production URL with `/?source=grok-bot` and submit.
+4. Submit once from Cursor without the query (`web`).
+5. Both rows in Neon means both platforms hit the same database.

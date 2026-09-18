@@ -6,7 +6,8 @@
     "dev": "next dev --hostname 0.0.0.0 --port 43217",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "attach:neon": "node scripts/zero-touch-attach.mjs"
   },
   "dependencies": {
     "@neondatabase/serverless": "^1.1.0",

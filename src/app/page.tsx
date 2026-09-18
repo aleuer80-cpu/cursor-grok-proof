@@ -1,0 +1,97 @@
+import { Badge } from "@/components/ui/badge"
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
+import { ApprovalForm } from "@/components/approval-form"
+import { listApprovals } from "@/lib/approvals"
+import { isNeonConfigured } from "@/lib/db"
+import { getStackStatus } from "@/lib/status"
+
+export default async function Home() {
+  const stack = getStackStatus()
+  const neonReady = isNeonConfigured()
+  let approvals: Awaited<ReturnType<typeof listApprovals>> = []
+  let neonError = ""
+
+  if (neonReady) {
+    try {
+      approvals = await listApprovals()
+    } catch (error) {
+      neonError = error instanceof Error ? error.message : "Could not read Neon"
+    }
+  }
+
+  return (
+    <main className="mx-auto flex min-h-full w-full max-w-2xl flex-1 flex-col items-center justify-center gap-10 px-6 py-16">
+      <div className="text-center">
+        <p className="mb-3 text-sm font-medium tracking-[0.2em] text-muted-foreground uppercase">
+          GitHub → Vercel → Neon
+        </p>
+        <h1 className="text-6xl font-semibold tracking-tight sm:text-8xl">
+          TEST REPO
+        </h1>
+      </div>
+      <ul className="flex flex-wrap items-center justify-center gap-2">
+        {stack.map((service) => (
+          <li key={service.name}>
+            <Badge variant={service.connected ? "default" : "outline"}>
+              {service.name}: {service.connected ? "connected" : "pending"}
+            </Badge>
+          </li>
+        ))}
+      </ul>
+      <Card className="w-full">
+        <CardHeader>
+          <CardTitle>Tested and Approved</CardTitle>
+          <CardDescription>
+            Saving this dropdown writes the phrase into Neon so Cursor and Grok
+            Bot can prove the same database is live.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="flex flex-col gap-6">
+          {neonReady ? null : (
+            <p className="text-sm text-muted-foreground">
+              Neon is not connected yet. Add Neon to the Vercel project, then
+              this form will write rows.
+            </p>
+          )}
+          {neonError ? (
+            <p className="text-sm text-destructive">{neonError}</p>
+          ) : null}
+          <ApprovalForm neonReady={neonReady} />
+          <div>
+            <h2 className="mb-2 text-sm font-medium">Rows in Neon</h2>
+            {approvals.length === 0 ? (
+              <p className="text-sm text-muted-foreground">
+                No approvals written yet.
+              </p>
+            ) : (
+              <ul className="space-y-2 text-sm">
+                {approvals.map((row) => (
+                  <li
+                    key={row.id}
+                    className="flex flex-wrap items-baseline justify-between gap-2 border-b border-border py-2 last:border-0"
+                  >
+                    <span>
+                      {row.phrase}{" "}
+                      <span className="text-muted-foreground">
+                        from {row.source}
+                      </span>
+                    </span>
+                    <time className="text-muted-foreground">
+                      {new Date(row.created_at).toLocaleString()}
+                    </time>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+    </main>
+  )
+}

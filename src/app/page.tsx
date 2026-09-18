@@ -63,8 +63,9 @@ export default async function Home({
           <CardTitle>Tested and Approved</CardTitle>
           <CardDescription>
             Saving this dropdown writes Tested and Approved. In this preview
-            the row is stored locally; with Neon on Vercel it lands in
-            Postgres so Cursor and Grok Bot share the same table.
+            the row is stored locally; once an agent attaches DATABASE_URL
+            through the Neon API and Vercel env API it lands in Postgres so
+            Cursor and Grok Bot share the same table.
           </CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col gap-6">
@@ -72,8 +73,8 @@ export default async function Home({
             <p className="text-sm text-muted-foreground">
               Neon is not attached yet. Use the dropdown and submit anyway —
               this preview stores the row locally so you can prove the write
-              path. After Neon is added on Vercel, the same submit writes to
-              Postgres.
+              path. After an agent sets DATABASE_URL via API, the same submit
+              writes to Postgres.
             </p>
           )}
           {neonError ? (

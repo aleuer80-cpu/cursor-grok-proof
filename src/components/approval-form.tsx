@@ -13,7 +13,13 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 
-export function ApprovalForm({ neonReady }: { neonReady: boolean }) {
+export function ApprovalForm({
+  neonReady,
+  source,
+}: {
+  neonReady: boolean
+  source: "web" | "grok-bot"
+}) {
   const [phrase, setPhrase] = useState(APPROVED_PHRASE)
   const [result, action, pending] = useActionState(
     saveTestedAndApproved,
@@ -23,7 +29,7 @@ export function ApprovalForm({ neonReady }: { neonReady: boolean }) {
   return (
     <form action={action} className="flex w-full max-w-md flex-col gap-4">
       <input type="hidden" name="phrase" value={phrase} />
-      <input type="hidden" name="source" value="web" />
+      <input type="hidden" name="source" value={source} />
       <div className="flex flex-col gap-2">
         <Label htmlFor="phrase-select">Neon write check</Label>
         <Select value={phrase} onValueChange={setPhrase}>
@@ -35,6 +41,9 @@ export function ApprovalForm({ neonReady }: { neonReady: boolean }) {
           </SelectContent>
         </Select>
       </div>
+      <p className="text-xs text-muted-foreground">
+        This submit is tagged <span className="font-medium">{source}</span>.
+      </p>
       <Button type="submit" disabled={pending || !neonReady}>
         {pending ? "Writing…" : "Write to Neon"}
       </Button>

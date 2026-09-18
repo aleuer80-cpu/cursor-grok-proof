@@ -7,13 +7,19 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import { ApprovalForm } from "@/components/approval-form"
-import { listApprovals } from "@/lib/approvals"
+import { listApprovals, resolveWriteSource } from "@/lib/approvals"
 import { isNeonConfigured } from "@/lib/db"
 import { getStackStatus } from "@/lib/status"
 
-export default async function Home() {
+export default async function Home({
+  searchParams,
+}: {
+  searchParams: Promise<{ source?: string }>
+}) {
   const stack = getStackStatus()
   const neonReady = isNeonConfigured()
+  const { source: sourceParam } = await searchParams
+  const source = resolveWriteSource(sourceParam)
   let approvals: Awaited<ReturnType<typeof listApprovals>> = []
   let neonError = ""
 
@@ -62,7 +68,7 @@ export default async function Home() {
           {neonError ? (
             <p className="text-sm text-destructive">{neonError}</p>
           ) : null}
-          <ApprovalForm neonReady={neonReady} />
+          <ApprovalForm neonReady={neonReady} source={source} />
           <div>
             <h2 className="mb-2 text-sm font-medium">Rows in Neon</h2>
             {approvals.length === 0 ? (

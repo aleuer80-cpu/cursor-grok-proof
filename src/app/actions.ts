@@ -1,7 +1,11 @@
 "use server"
 
 import { revalidatePath } from "next/cache"
-import { APPROVED_PHRASE, saveApproval } from "@/lib/approvals"
+import {
+  APPROVED_PHRASE,
+  resolveWriteSource,
+  saveApproval,
+} from "@/lib/approvals"
 import { isNeonConfigured } from "@/lib/db"
 
 export type SaveResult = {
@@ -14,7 +18,7 @@ export async function saveTestedAndApproved(
   formData: FormData
 ): Promise<SaveResult> {
   const phrase = String(formData.get("phrase") ?? "")
-  const source = String(formData.get("source") ?? "web")
+  const source = resolveWriteSource(String(formData.get("source") ?? "web"))
 
   if (phrase !== APPROVED_PHRASE) {
     return {

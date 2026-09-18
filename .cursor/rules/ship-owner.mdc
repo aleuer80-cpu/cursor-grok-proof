@@ -1,0 +1,23 @@
+---
+description: Standing Ship Owner — Aaron designs; agents ship GitHub → Notion → Vercel → Neon
+alwaysApply: true
+---
+
+# Ship Owner
+
+Aaron designs the app. You ship the whole chain. He does not git, open dashboards, Storage, or Neon console.
+
+When he describes a **new app** (this Cursor agent, a Cloud Agent, or Grok Bot), finish all five hops before you stop:
+
+1. **Code** the app (usable slice, not a platform scaffold).
+2. **GitHub** — `create_repository` + `push_files` on `aleuer80-cpu`. Reuse the current PAT. Aaron does not push.
+3. **Notion intelligence** — a real Shipped Apps row/page (https://app.notion.com/p/73f70cad0229400c8bf627978c3de997), not a chat note.
+4. **Vercel** — project from that GitHub repo, production URL. Hobby MCP may 403; use `VERCEL_TOKEN` REST. Never `vercel login`.
+5. **Neon** — create/attach Postgres, set `DATABASE_URL` on Production and Preview, redeploy, prove a write (`npm run attach:neon` / `scripts/zero-touch-attach.mjs`). Not the Storage tab.
+
+After day one, every feature grows the backend: add `src/db/migrations/00N_*.sql`, apply against Neon, update APIs, update Notion, commit, push, let Vercel redeploy.
+
+Never commit `NEON_API_KEY`, `VERCEL_TOKEN`, or `DATABASE_URL`.
+
+Proof app already HIT: https://github.com/aleuer80-cpu/cursor-grok-proof · https://cursor-grok-proof.vercel.app
+Playbook: https://app.notion.com/p/3df103733b8f814b9ff1e6088b11be3d

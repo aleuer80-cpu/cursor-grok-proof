@@ -10,7 +10,7 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 
 # Dual-platform ship path (Cursor and Grok Bot)
 
-Aaron designs. Agents finish to Neon. Do not send Aaron to the Vercel Storage tab, dashboards, PAT regeneration, or extra OAuth.
+The standing **Ship Owner** agent owns this chain. Aaron designs. Ship Owner finishes to Neon. Do not send Aaron to the Vercel Storage tab, dashboards, PAT regeneration, or extra OAuth. See `.cursor/rules/ship-owner.mdc`.
 
 When he says **new app** in either tool, complete all five hops:
 

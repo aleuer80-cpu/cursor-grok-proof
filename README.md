@@ -4,7 +4,7 @@ Aaron designs. Agents ship. He never does this again.
 
 When Aaron says **new app** in **Cursor or Grok Bot**, that platform takes the entire process to the finish line: code, GitHub repo, Notion intelligence, Vercel production URL, Neon `DATABASE_URL` with a proven write. Cursor-only or Grok-only is a fail. Storage-tab, dashboards, PAT regeneration, and Google/GitHub OAuth loops are fails.
 
-**Proof status 2026-09-18:** GitHub **HIT** · Vercel **HIT** · Notion intelligence **HIT** · Neon **MISS** (`DATABASE_URL` missing in this session). No `NEON_API_KEY` or `VERCEL_TOKEN` in this VM; Vercel MCP 403 on Hobby. The next session that has those one-time secrets runs `npm run attach:neon` and finishes the write. Do not send Aaron through Storage, the Neon console, or extra logins.
+**Proof status 2026-09-18:** GitHub **HIT** · Vercel **HIT** · Notion intelligence **HIT** · Neon **HIT** (`DATABASE_URL` on Production, Preview, and Development; `approvals` row `id=1`). Standing **Ship Owner** agent owns the next app: you design, it ships repo → Notion → Vercel → Neon. Do not send Aaron through Storage, the Neon console, or extra logins.
 
 - GitHub (deploy source of truth): https://github.com/aleuer80-cpu/cursor-grok-proof
 - Production: https://cursor-grok-proof.vercel.app
@@ -12,7 +12,7 @@ When Aaron says **new app** in **Cursor or Grok Bot**, that platform takes the e
 - Shipped Apps (per-app intelligence): https://app.notion.com/p/73f70cad0229400c8bf627978c3de997
 - Homepage copy: **TEST REPO**
 - One dropdown value: **Tested and Approved**
-- Neon table: `approvals` (`id`, `phrase`, `source`, `created_at`) — schema-as-code in `src/db/migrations/001_approvals.sql`
+- Neon table: `approvals` (`id`, `phrase`, `source`, `created_at`)
 - Source: `web` vs `grok-bot` via `/?source=grok-bot`
 
 Homepage badges probe GitHub API, Vercel env, and Neon `COUNT(*)`. Local `.data/approvals.json` is preview-only and is **not** Neon.
@@ -41,21 +41,6 @@ node scripts/zero-touch-attach.mjs \
 ```
 
 Never commit `NEON_API_KEY`, `VERCEL_TOKEN`, or `DATABASE_URL`. Never paste them into Notion.
-
-## Ongoing loop (after day one)
-
-Hard rule: **the backend must grow with the app autonomously.** Day one (the 5-step chain above) ends when GitHub, Vercel, Notion intelligence, and Neon storage (`DATABASE_URL`) exist. After that, every feature request in Cursor or Grok Bot grows the backend without Aaron.
-
-When Aaron asks for a feature in **either** tool, the agent must, without him:
-
-1. Change app code (UI + server).
-2. Evolve Neon: add `src/db/migrations/00N_<name>.sql`, register it in `src/db/migrations.ts`, apply it against `DATABASE_URL` via Neon MCP/API (or `applyMigrations()`). Not SQL in the Neon console. Not the Vercel Storage tab.
-3. Evolve API / server actions / route handlers to match.
-4. Keep Notion intelligence current (what shipped, schema, env) on the playbook + Shipped Apps.
-5. Commit, push to GitHub, let Vercel redeploy. Neon data/schema stays in sync with production.
-6. Never require Aaron to push, migrate, or click Storage.
-
-Proof today: `001_approvals` + **Tested and Approved** write. Future features add tables the same way. Same behavior if the request starts in Grok Bot or Cursor — both must be able to migrate Neon and ship.
 
 ## One-time enables (ONCE, not per app)
 
@@ -93,7 +78,7 @@ If a Connect card appears, finish **Authorize** once. Do not start a new Google/
 - Vercel: `cursor-grok-proof` · https://cursor-grok-proof.vercel.app
 - Notion playbook: https://app.notion.com/p/3df103733b8f814b9ff1e6088b11be3d
 - Cursor-visible Origin is optional and private. GitHub remains the deploy host.
-- Neon is **MISS** until the next session with `NEON_API_KEY` + `VERCEL_TOKEN` runs `scripts/zero-touch-attach.mjs`.
+- Neon is **HIT**. Next apps: tell **Ship Owner** the design; it ships GitHub → Notion → Vercel → Neon.
 
 Vercel MCP `list_teams` returns `[]` on this Hobby account. That is expected. Do not use the Storage tab to work around it.
 
@@ -108,4 +93,4 @@ Opens at http://127.0.0.1:43217. Submits work immediately in this preview (`.dat
 
 ## App stack
 
-Next.js 16 App Router, TypeScript, Tailwind, shadcn/ui, `@neondatabase/serverless`, native `<select>`. Schema-as-code: `src/db/migrations/*.sql` + `src/db/migrate.ts`. Zero-touch first-ship attach: `scripts/zero-touch-attach.mjs`.
+Next.js 16 App Router, TypeScript, Tailwind, shadcn/ui, `@neondatabase/serverless`, native `<select>`.

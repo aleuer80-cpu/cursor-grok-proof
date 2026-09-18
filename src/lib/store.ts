@@ -59,16 +59,26 @@ export async function ensureApprovalsTable() {
   `
 }
 
+function asApprovalRows(rows: Record<string, unknown>[]): ApprovalRow[] {
+  return rows.map((row) => ({
+    id: Number(row.id),
+    phrase: String(row.phrase),
+    source: String(row.source),
+    created_at: String(row.created_at),
+  }))
+}
+
 export async function listApprovals(): Promise<ApprovalRow[]> {
   if (isNeonConfigured()) {
     const sql = getSql()
     await ensureApprovalsTable()
-    return sql`
+    const rows = await sql`
       SELECT id, phrase, source, created_at
       FROM approvals
       ORDER BY created_at DESC
       LIMIT 20
-    ` as Promise<ApprovalRow[]>
+    `
+    return asApprovalRows(rows)
   }
 
   if (process.env.VERCEL) return []
@@ -81,12 +91,12 @@ export async function saveApproval(
   if (isNeonConfigured()) {
     const sql = getSql()
     await ensureApprovalsTable()
-    const rows = (await sql`
+    const rows = await sql`
       INSERT INTO approvals (phrase, source)
       VALUES (${APPROVED_PHRASE}, ${source})
       RETURNING id, phrase, source, created_at
-    `) as ApprovalRow[]
-    return { row: rows[0], destination: "neon" }
+    `
+    return { row: asApprovalRows(rows)[0], destination: "neon" }
   }
 
   if (process.env.VERCEL) {

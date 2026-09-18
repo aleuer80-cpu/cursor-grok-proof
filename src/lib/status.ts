@@ -47,17 +47,76 @@ async function probeGitHub(): Promise<ServiceStatus> {
   }
 }
 
-function probeVercel(): ServiceStatus {
-  const vercelUrl = process.env.VERCEL_PROJECT_PRODUCTION_URL
+async function githubJson<T>(path: string): Promise<T> {
+  const res = await fetch(`${GITHUB_API}${path}`, {
+    headers: { Accept: "application/vnd.github+json" },
+    cache: "no-store",
+  })
+  if (!res.ok) {
+    throw new Error(`GitHub HTTP ${res.status}`)
+  }
+  return res.json() as Promise<T>
+}
+
+async function probeVercel(): Promise<ServiceStatus> {
+  const localUrl = process.env.VERCEL_PROJECT_PRODUCTION_URL
     ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
     : process.env.VERCEL_URL
       ? `https://${process.env.VERCEL_URL}`
       : ""
-  return {
-    name: "Vercel",
-    connected: Boolean(process.env.VERCEL),
-    detail: vercelUrl || "Not deployed. Import the GitHub repo at vercel.com/new",
-    href: vercelUrl || "https://vercel.com/new",
+
+  if (process.env.VERCEL) {
+    return {
+      name: "Vercel",
+      connected: true,
+      detail: localUrl || "Running on Vercel",
+      href: localUrl || GITHUB_REPO,
+    }
+  }
+
+  try {
+    const deployments = await githubJson<
+      { id: number; statuses_url: string; created_at: string }[]
+    >("/deployments?per_page=1")
+    if (!deployments.length) {
+      return {
+        name: "Vercel",
+        connected: false,
+        detail: "No Vercel deployments on GitHub yet",
+        href: "https://vercel.com/new",
+      }
+    }
+    const statuses = await githubJson<
+      { state: string; description?: string; environment_url?: string; target_url?: string }[]
+    >(
+      `/deployments/${deployments[0].id}/statuses`
+    )
+    const latest = statuses[0]
+    const url = latest?.environment_url || latest?.target_url || ""
+    if (latest?.state === "success") {
+      return {
+        name: "Vercel",
+        connected: true,
+        detail: `production ready${url ? ` · ${url}` : ""}`,
+        href: url || GITHUB_REPO,
+      }
+    }
+    return {
+      name: "Vercel",
+      connected: false,
+      detail:
+        latest?.state === "failure"
+          ? "Vercel build failed. Push a green `next build` to GitHub."
+          : `Vercel deploy ${latest?.state ?? "unknown"}`,
+      href: url || `${GITHUB_REPO}/deployments`,
+    }
+  } catch (error) {
+    return {
+      name: "Vercel",
+      connected: false,
+      detail: error instanceof Error ? error.message : "Could not read Vercel status",
+      href: `${GITHUB_REPO}/deployments`,
+    }
   }
 }
 
@@ -72,13 +131,14 @@ async function probeNeon(): Promise<ServiceStatus> {
   try {
     const sql = getSql()
     await ensureApprovalsTable()
-    const rows = (await sql`
+    const rows = await sql`
       SELECT COUNT(*)::int AS n FROM approvals
-    `) as { n: number }[]
+    `
+    const n = Number(rows[0]?.n ?? 0)
     return {
       name: "Neon",
       connected: true,
-      detail: `${rows[0]?.n ?? 0} rows in approvals`,
+      detail: `${n} rows in approvals`,
     }
   } catch (error) {
     return {
@@ -90,6 +150,10 @@ async function probeNeon(): Promise<ServiceStatus> {
 }
 
 export async function getStackStatus(): Promise<ServiceStatus[]> {
-  const [github, neon] = await Promise.all([probeGitHub(), probeNeon()])
-  return [github, probeVercel(), neon]
+  const [github, vercel, neon] = await Promise.all([
+    probeGitHub(),
+    probeVercel(),
+    probeNeon(),
+  ])
+  return [github, vercel, neon]
 }

@@ -125,7 +125,8 @@ async function probeNeon(): Promise<ServiceStatus> {
     return {
       name: "Neon",
       connected: false,
-      detail: "DATABASE_URL missing. Add Neon on the Vercel project Storage tab.",
+      detail:
+        "DATABASE_URL missing. Attach via Neon API + Vercel env API (scripts/zero-touch-attach.mjs), not Storage.",
     }
   }
   try {

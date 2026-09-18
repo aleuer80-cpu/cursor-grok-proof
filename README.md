@@ -14,7 +14,7 @@ npm install
 npm run dev
 ```
 
-Opens at http://127.0.0.1:43217. Copy `.env.example` to `.env.local` and set `DATABASE_URL` if you want local Neon writes.
+Opens at http://127.0.0.1:43217. The dropdown submit works immediately in this preview (rows land in `.data/approvals.json`). Copy `.env.example` to `.env.local` and set `DATABASE_URL` when you want those same writes to go to Neon.
 
 ## Connect Vercel (once, in the dashboard)
 
@@ -30,7 +30,7 @@ This Cloud Agent cannot git-link a Vercel project on the personal Hobby account 
 2. Confirm `DATABASE_URL` is set for Production and Preview.
 3. Redeploy if the first build ran before Neon was attached.
 
-When Neon is live, the site badge reads `Neon: connected` and **Write to Neon** is enabled.
+When Neon is live, the site badge reads `Neon: connected` and submits go to Postgres instead of the preview file.
 
 ## Prove Cursor and Grok Bot share the stack
 

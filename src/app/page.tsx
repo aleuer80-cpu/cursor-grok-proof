@@ -7,7 +7,8 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import { ApprovalForm } from "@/components/approval-form"
-import { listApprovals, resolveWriteSource } from "@/lib/approvals"
+import { resolveWriteSource } from "@/lib/approvals"
+import { listApprovals } from "@/lib/store"
 import { isNeonConfigured } from "@/lib/db"
 import { getStackStatus } from "@/lib/status"
 
@@ -23,12 +24,10 @@ export default async function Home({
   let approvals: Awaited<ReturnType<typeof listApprovals>> = []
   let neonError = ""
 
-  if (neonReady) {
-    try {
-      approvals = await listApprovals()
-    } catch (error) {
-      neonError = error instanceof Error ? error.message : "Could not read Neon"
-    }
+  try {
+    approvals = await listApprovals()
+  } catch (error) {
+    neonError = error instanceof Error ? error.message : "Could not read saved rows"
   }
 
   return (
@@ -54,15 +53,18 @@ export default async function Home({
         <CardHeader>
           <CardTitle>Tested and Approved</CardTitle>
           <CardDescription>
-            Saving this dropdown writes the phrase into Neon so Cursor and Grok
-            Bot can prove the same database is live.
+            Saving this dropdown writes Tested and Approved. In this preview
+            the row is stored locally; with Neon on Vercel it lands in
+            Postgres so Cursor and Grok Bot share the same table.
           </CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col gap-6">
           {neonReady ? null : (
             <p className="text-sm text-muted-foreground">
-              Neon is not connected yet. Add Neon to the Vercel project, then
-              this form will write rows.
+              Neon is not attached yet. Use the dropdown and submit anyway —
+              this preview stores the row locally so you can prove the write
+              path. After Neon is added on Vercel, the same submit writes to
+              Postgres.
             </p>
           )}
           {neonError ? (
@@ -70,7 +72,9 @@ export default async function Home({
           ) : null}
           <ApprovalForm neonReady={neonReady} source={source} />
           <div>
-            <h2 className="mb-2 text-sm font-medium">Rows in Neon</h2>
+            <h2 className="mb-2 text-sm font-medium">
+              {neonReady ? "Rows in Neon" : "Rows in this preview"}
+            </h2>
             {approvals.length === 0 ? (
               <p className="text-sm text-muted-foreground">
                 No approvals written yet.

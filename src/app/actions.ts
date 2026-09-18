@@ -4,9 +4,8 @@ import { revalidatePath } from "next/cache"
 import {
   APPROVED_PHRASE,
   resolveWriteSource,
-  saveApproval,
 } from "@/lib/approvals"
-import { isNeonConfigured } from "@/lib/db"
+import { saveApproval } from "@/lib/store"
 
 export type SaveResult = {
   ok: boolean
@@ -23,26 +22,25 @@ export async function saveTestedAndApproved(
   if (phrase !== APPROVED_PHRASE) {
     return {
       ok: false,
-      message: `Choose "${APPROVED_PHRASE}" before saving to Neon.`,
-    }
-  }
-
-  if (!isNeonConfigured()) {
-    return {
-      ok: false,
-      message: "Neon is not connected yet. DATABASE_URL is missing.",
+      message: `Choose "${APPROVED_PHRASE}" before saving.`,
     }
   }
 
   try {
-    const row = await saveApproval(source)
+    const { row, destination } = await saveApproval(source)
     revalidatePath("/")
+    if (destination === "neon") {
+      return {
+        ok: true,
+        message: `Wrote "${row.phrase}" to Neon as row ${row.id}.`,
+      }
+    }
     return {
       ok: true,
-      message: `Wrote "${row.phrase}" to Neon as row ${row.id}.`,
+      message: `Wrote "${row.phrase}" in this preview as row ${row.id}. Add Neon on Vercel to persist in Postgres.`,
     }
   } catch (error) {
-    const detail = error instanceof Error ? error.message : "Unknown Neon error"
+    const detail = error instanceof Error ? error.message : "Unknown write error"
     return { ok: false, message: detail }
   }
 }

@@ -73,7 +73,13 @@ export default async function Home({
           <ApprovalForm neonReady={neonReady} source={source} />
           <div>
             <h2 className="mb-2 text-sm font-medium">
-              {neonReady ? "Rows in Neon" : "Rows in this preview"}
+              {approvals.length === 0
+                ? neonReady
+                  ? "No submissions in Neon"
+                  : "No submissions in this preview"
+                : `${approvals.length} ${
+                    approvals.length === 1 ? "submission" : "submissions"
+                  } ${neonReady ? "in Neon" : "in this preview"}`}
             </h2>
             {approvals.length === 0 ? (
               <p className="text-sm text-muted-foreground">
@@ -87,7 +93,7 @@ export default async function Home({
                     className="flex flex-wrap items-baseline justify-between gap-2 border-b border-border py-2 last:border-0"
                   >
                     <span>
-                      {row.phrase}{" "}
+                      #{row.id} {row.phrase}{" "}
                       <span className="text-muted-foreground">
                         from {row.source}
                       </span>

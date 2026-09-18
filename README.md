@@ -1,51 +1,86 @@
 # TEST REPO
 
-Proof site for the GitHub → Vercel → Neon path shared by Cursor and Grok Bot.
+Aaron designs. Agents ship. He never does this again.
 
-**Status 2026-09-18:** GitHub **HIT** · Vercel **HIT** · Neon **MISS** (`DATABASE_URL` missing). This agent could not attach Neon from the cloud environment (Vercel MCP 403 on the personal Hobby account, Vercel CLI not logged in, marketplace `vercel install neon` required a new login and was aborted, no Neon API key). Do not log in with Google/GitHub again.
+When Aaron says **new app** in **Cursor or Grok Bot**, that platform takes the entire process to the finish line: code, GitHub repo, Notion intelligence, Vercel production URL, Neon `DATABASE_URL` with a proven write. Cursor-only or Grok-only is a fail. Storage-tab, dashboards, PAT regeneration, and Google/GitHub OAuth loops are fails.
 
-- GitHub: https://github.com/aleuer80-cpu/cursor-grok-proof (public)
-- Production (user-confirmed HIT): https://cursor-grok-proof-4ee6m7vlv-aleuer80-cpu.vercel.app (SHA `7945c51`, vercel[bot] success)
-- Later GitHub deploy: https://cursor-grok-proof-qlbqq63ub-aleuer80-cpu.vercel.app (SHA `630de1c`, vercel[bot] success)
+**Proof status 2026-09-18:** GitHub **HIT** · Vercel **HIT** · Notion intelligence **HIT** · Neon **MISS** (`DATABASE_URL` missing in this session). No `NEON_API_KEY` or `VERCEL_TOKEN` in this VM; Vercel MCP 403 on Hobby. The next session that has those one-time secrets runs `npm run attach:neon` and finishes the write. Do not send Aaron through Storage, the Neon console, or extra logins.
+
+- GitHub (deploy source of truth): https://github.com/aleuer80-cpu/cursor-grok-proof
+- Production: https://cursor-grok-proof.vercel.app
+- Playbook (do not duplicate): https://app.notion.com/p/3df103733b8f814b9ff1e6088b11be3d
+- Shipped Apps (per-app intelligence): https://app.notion.com/p/73f70cad0229400c8bf627978c3de997
 - Homepage copy: **TEST REPO**
 - One dropdown value: **Tested and Approved**
 - Neon table: `approvals` (`id`, `phrase`, `source`, `created_at`)
 - Source: `web` vs `grok-bot` via `/?source=grok-bot`
 
-The homepage badges actually probe each hop: GitHub API, Vercel env, Neon `COUNT(*)`. Local `.data/approvals.json` is preview-only and is **not** Neon.
+Homepage badges probe GitHub API, Vercel env, and Neon `COUNT(*)`. Local `.data/approvals.json` is preview-only and is **not** Neon.
 
-## Remaining step (Neon)
+## 5-step chain (same steps, either tool)
 
-On the existing Vercel project: **Storage tab → Neon (Marketplace) → it injects `DATABASE_URL`**. Then redeploy and submit **Tested and Approved** once on the production URL.
+Trigger: Aaron says **new app** in Cursor or Grok Bot.
 
-## Dual-platform playbook (Cursor and Grok Bot)
+| Step | What the agent creates | Cursor | Grok Bot |
+| --- | --- | --- | --- |
+| 1. Code | The app | This agent / Cloud Agent | Grok Bot coding |
+| 2. GitHub repo | Public or private repo + push. Aaron does not git. | GitHub MCP `create_repository` + `push_files` | GitHub plugin on the **same** `aleuer80-cpu` account. Reuse the current PAT; do not mint a new one. |
+| 3. Notion intelligence | A **real page or database row** for that app (design, hops, URLs). Not a chat note. | Notion MCP `create-pages` / `create-database` into **Shipped Apps** | Notion plugin, same Aaron Leuer Space |
+| 4. Vercel | Project from that GitHub repo → production URL | `VERCEL_TOKEN` REST (`POST /v11/projects` + git) or Vercel MCP `create_git_project` if a team exists. Hobby MCP 403 is expected. | Vercel plugin, same Vercel account |
+| 5. Neon | New Neon project → `DATABASE_URL` on Vercel Production **and** Preview → redeploy → prove a write | Neon MCP (`https://mcp.neon.tech/mcp`) or `NEON_API_KEY`, then `npm run attach:neon` | Neon Postgres plugin, then the same Vercel env write |
 
-Reuse the same GitHub PAT in both tools. Do not mint a new PAT if the current one already creates and pushes.
+After step 5, submit **Tested and Approved** on production. Grok Bot proof uses `/?source=grok-bot`. Two Neon rows (`web` + `grok-bot`) means both platforms hit the same database.
 
-| Tool | How to create a repo | How it deploys |
+```bash
+npm run attach:neon
+# or:
+node scripts/zero-touch-attach.mjs \
+  --vercel-project=cursor-grok-proof \
+  --neon-project=cursor-grok-proof \
+  --github=aleuer80-cpu/cursor-grok-proof
+```
+
+Never commit `NEON_API_KEY`, `VERCEL_TOKEN`, or `DATABASE_URL`. Never paste them into Notion.
+
+## One-time enables (ONCE, not per app)
+
+After this list, Aaron never installs anything for a new app.
+
+### Cursor (once)
+
+| Piece | Enable | Then agents can |
 | --- | --- | --- |
-| Cursor | GitHub MCP `create_repository` + `push_files` | Push to `aleuer80-cpu`. Vercel auto-deploys. |
-| Grok Bot | Its GitHub plugin, pointed at the **same** repo | Same push → same Vercel project. |
+| GitHub MCP | Already working. Fine-grained PAT: **Administration:write** + **Contents:write**, or classic repo-scoped. **Reuse it.** | `create_repository` / `push_files` |
+| Vercel MCP + `VERCEL_TOKEN` | Plugin already connected; Hobby MCP **403**. Persist **`VERCEL_TOKEN`** as a Cloud Agent secret (not in git). Do not `vercel login` / Google / GitHub again. | Set env vars + create project + redeploy via API |
+| Neon plugin + `NEON_API_KEY` | Enable Neon MCP at `https://mcp.neon.tech/mcp` (or `/add-plugin neon-postgres`). Persist **`NEON_API_KEY`** as a Cloud Agent secret. | Create the Neon project and get `DATABASE_URL` |
+| Notion MCP | Already connected to Aaron Leuer’s Space. | Create the per-app page/db in Shipped Apps |
 
-Cursor GitHub MCP needs a fine-grained PAT with **Administration:write** + **Contents:write**, or a classic repo-scoped token. That is the token to reuse in Grok Bot.
+`.cursor/mcp.json` points at the official Neon remote MCP. Cloud Agents still need that server **enabled** in the environment; the file does not inject secrets. `.cursor/environment.json` is `npm ci` + `npm run dev`.
 
-Vercel / Neon / Notion plugins are **separate auth lists** in each tool. Installing GitHub in Cursor and Grok Bot does **not** install Vercel, Neon, or Notion.
+### Grok Bot (once, in-app)
 
-Neon is attached once on the Vercel project (Storage / Marketplace) so `DATABASE_URL` is shared.
+Plugins are a **separate** auth list. Installing them in Cursor does **not** install them in Grok Bot.
 
-### Grok Bot proof (after Neon)
+Open Grok Bot → **Plugins** → **Add** each of these. Authorize each provider once. Then never again.
 
-1. Open the production URL with `/?source=grok-bot`
-2. Submit **Tested and Approved**.
-3. Confirm a Neon hit and a new `source = grok-bot` row.
+| Plugin | Search | Purpose |
+| --- | --- | --- |
+| **GitHub** | `GitHub` | Same GitHub account / same PAT as Cursor. Create + push repos. |
+| **Notion** | `Notion` | **Required.** New page/db per app in Aaron Leuer’s Space. Marketplace id `notion-workspace`. |
+| **Vercel** | `Vercel` | Project from GitHub + set `DATABASE_URL` on Production + Preview. |
+| **Neon Postgres** | `neon` | Create Neon project/branch and return `DATABASE_URL`. |
 
-Optional: submit once from Cursor without the query (`web`). Two Neon rows means both platforms hit the same database.
+If a Connect card appears, finish **Authorize** once. Do not start a new Google/GitHub login if that account is already the one Grok Bot uses.
 
-## Still blocked
+## This proof app
 
-- Vercel MCP **403** on personal Hobby `aleuer80-cpu` (empty teams, cannot list/get the project, cannot mint a shareable URL). Dashboard import already worked.
-- This is a new project. For a Cursor-visible named repo, use the **Create repo** pill. GitHub is the deploy source of truth.
-- Neon until the Storage tab step above.
+- GitHub SoT: https://github.com/aleuer80-cpu/cursor-grok-proof
+- Vercel: `cursor-grok-proof` · https://cursor-grok-proof.vercel.app
+- Notion playbook: https://app.notion.com/p/3df103733b8f814b9ff1e6088b11be3d
+- Cursor-visible Origin is optional and private. GitHub remains the deploy host.
+- Neon is **MISS** until the next session with `NEON_API_KEY` + `VERCEL_TOKEN` runs `scripts/zero-touch-attach.mjs`.
+
+Vercel MCP `list_teams` returns `[]` on this Hobby account. That is expected. Do not use the Storage tab to work around it.
 
 ## Local
 

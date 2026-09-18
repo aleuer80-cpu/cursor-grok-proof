@@ -37,7 +37,7 @@ export async function saveTestedAndApproved(
     }
     return {
       ok: true,
-      message: `Wrote "${row.phrase}" in this preview as row ${row.id}. Add Neon on Vercel to persist in Postgres.`,
+      message: `Wrote "${row.phrase}" in this preview as row ${row.id}. Persist to Postgres after an agent attaches DATABASE_URL via Neon API + Vercel env API.`,
     }
   } catch (error) {
     const detail = error instanceof Error ? error.message : "Unknown write error"

@@ -7,6 +7,7 @@ import {
   type ApprovalRow,
   type SaveDestination,
 } from "@/lib/approvals"
+import { applyMigrations } from "@/db/migrate"
 import { getSql, isNeonConfigured } from "@/lib/db"
 
 const LOCAL_STORE_PATH = path.join(process.cwd(), ".data", "approvals.json")
@@ -48,15 +49,7 @@ async function saveLocalApproval(source: string): Promise<ApprovalRow> {
 }
 
 export async function ensureApprovalsTable() {
-  const sql = getSql()
-  await sql`
-    CREATE TABLE IF NOT EXISTS approvals (
-      id SERIAL PRIMARY KEY,
-      phrase TEXT NOT NULL,
-      source TEXT NOT NULL DEFAULT 'web',
-      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-    )
-  `
+  await applyMigrations()
 }
 
 function asApprovalRows(rows: Record<string, unknown>[]): ApprovalRow[] {
@@ -101,7 +94,7 @@ export async function saveApproval(
 
   if (process.env.VERCEL) {
     throw new Error(
-      "DATABASE_URL is missing on Vercel. Add Neon in the project Storage tab, then redeploy."
+      "DATABASE_URL is missing on Vercel. An agent must run scripts/zero-touch-attach.mjs with NEON_API_KEY and VERCEL_TOKEN (Neon API + Vercel env API), then redeploy. Do not use the Storage tab."
     )
   }
 
